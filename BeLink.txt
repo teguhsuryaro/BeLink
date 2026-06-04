@@ -1,0 +1,45 @@
+﻿1. Deskripsi Produk (Update v3)
+Nama Platform: BeLink 
+Konsep Utama: Platform on-demand layanan darurat kendaraan berbasis GPS. Menghubungkan pengguna dengan mitra (mekanik independen atau bengkel) melalui sistem penawaran ongkos jalan dan negosiasi. 
+Model Bisnis (Monetisasi): Platform mengambil komisi sebesar 10% khusus dari Harga Jalan (ongkos transport) melalui sistem Deposit Mitra. Pembayaran antara pengguna dan mitra dilakukan di luar sistem (tunai/transfer langsung).
+2. Alur Sistem & Interaksi (User Flow)
+A. Akses Publik & Registrasi
+* Guest Mode: Bisa melihat halaman awal tanpa login.
+* Pemesanan: Wajib memiliki akun terdaftar.
+* Pendaftaran Mitra: Dilakukan melalui dashboard pengguna. Pengguna biasa bisa beralih menjadi mitra melalui verifikasi.
+B. Alur Pemesanan & Kalkulasi Jarak
+1. Formulir Darurat:
+   * Tombol deteksi lokasi GPS terkini.
+   * Pemilihan tipe kendaraan (Motor / Mobil).
+   * Input merk/jenis kendaraan ATAU upload foto kendaraan.
+   * Pemilihan jenis kerusakan ATAU input teks manual disertai wajib upload foto kerusakan.
+2. Kalkulasi "Harga Jalan" (Ongkos Transport):
+   * Integrasi Peta: Sistem menggunakan Map API untuk menghitung jarak tempuh berkendara (rute jalan), bukan sekadar jarak radius garis lurus.
+   * Pengguna menentukan ongkos jalan (Sistem menetapkan batas minimal Rp5.000/km dari total jarak tempuh rute).
+   * Alert: Notifikasi bahwa menaikkan harga jalan akan mempercepat ditemukannya mekanik.
+3. Pencarian Mitra: Ping ke mitra terdekat. Sistem menyembunyikan profil mitra miliknya sendiri jika pengguna sedang memesan.
+C. Alur Negosiasi & Filter Keamanan
+1. Halaman Komunikasi (Tab Switcher: CHAT & STATUS):
+   * Tab Chat (Negosiasi): Berisi fitur obrolan.
+   * Anti-Bypass Filter: Sistem secara otomatis mendeteksi dan menghapus/menyamarkan pesan yang mengandung format nomor handphone atau link (URL) untuk mencegah transaksi di luar platform.
+   * Tab Status: Menampilkan alamat, daftar keluhan, dan harga jalan berdasarkan urgensi.
+2. Persetujuan (Action Buttons):
+   * Pengguna: Klik "Datang Kesini" jika deal. Tombol berubah warna.
+   * Mitra: Setelah pengguna setuju, tombol "Masih Nego" aktif menjadi "OTW". Klik "OTW" untuk memulai perjalanan.
+D. Kebijakan Pembatalan & Eksekusi (Locked State)
+* Sebelum "OTW": Pembatalan bisa dilakukan oleh kedua belah pihak.
+* Setelah Mitra Klik "OTW":
+   * Tombol pembatalan di sisi Pengguna dikunci permanen (hilang/disabled).
+   * Jika pengguna terbukti membatalkan sepihak di lapangan atau kendaraan mendadak normal, pengguna wajib tetap membayar uang jalan sesuai kesepakatan awal.
+* Penyelesaian: Mitra menyelesaikan pesanan, pengguna memberikan ulasan.
+3. Sistem Monetisasi & Dompet Mitra (Deposit)
+* Kewajiban Deposit: Mitra wajib memiliki saldo deposit minimal Rp10.000 untuk bisa menerima/mengambil pesanan masuk. Jika di bawah itu, sistem menolak/memberikan peringatan dan mitra harus top-up.
+* Soft Alert: Jika saldo mendekati batas bawah (misal sisa Rp12.000), akan muncul peringatan ringan di dashboard mitra.
+* Skema Potongan (10% Biaya Layanan):
+   * Potongan hanya berlaku pada total uang jalan, bukan pada harga perbaikan kendaraan.
+   * Simulasi: Jarak 5 km. Pengguna bid Rp5.000/km. Total Uang Jalan = Rp25.000. Saat pesanan berstatus Selesai, sistem otomatis memotong saldo deposit mitra sebesar Rp2.500 (10% dari Rp25.000).
+4. Sistem Akun & Manajemen Peran (Roles)
+* Pengguna Biasa: Memiliki mode customer. Bisa berubah menjadi mitra melalui verifikasi (KTP, foto diri/teknisi, dll).
+* Mitra Independen: Hanya bisa menangani 1 pesanan (otomatis offline saat sedang bekerja).
+* Mitra Bengkel: Bisa menangani banyak pesanan jika ada teknisi idle.
+* Superadmin: Mengelola banned user/partner, memverifikasi pendaftaran, melihat statistik, dan mengelola flag/report pelanggaran.

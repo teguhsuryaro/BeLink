@@ -1,111 +1,230 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* Leaflet CSS — diperlukan untuk rendering peta */
+@import 'leaflet/dist/leaflet.css';
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+/* ============================================
+   BeLink — Base Styles
+   ============================================ */
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Google Font: Plus Jakarta Sans */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+/* Tailwind Layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   BASE LAYER — Reset & Defaults
+   ============================================ */
+@layer base {
+  /* Smooth color transition untuk dark/light mode */
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color;
+    transition-duration: 250ms;
+    transition-timing-function: ease-in-out;
+  }
+
+  /* Mencegah transition animasi saat pertama kali load */
+  .preload *,
+  .preload *::before,
+  .preload *::after {
+    transition: none !important;
+  }
+
+  html {
+    @apply scroll-smooth antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* === MODE TERANG (default) === */
+  body {
+    @apply bg-surface-light text-text-primary-light;
+  }
+
+  /* === MODE GELAP === */
+  .dark body {
+    @apply bg-surface-dark text-text-primary-dark;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border-light rounded-full;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-border-dark;
+  }
+
+  /* Focus outline yang konsisten */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+
+  /* Placeholder styling */
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-text-muted-light;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    @apply text-text-muted-dark;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+/* ============================================
+   COMPONENTS LAYER — Reusable classes
+   ============================================ */
+@layer components {
+  /* Card base */
+  .card {
+    @apply bg-card-light border border-border-light rounded-xl shadow-soft;
   }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  .dark .card {
+    @apply bg-card-dark border-border-dark shadow-dark-soft;
+  }
+
+  /* Gradient tipis primary */
+  .gradient-primary {
+    background: linear-gradient(135deg, #3661E2 0%, #5B80F0 100%);
+  }
+
+  .gradient-primary-soft {
+    background: linear-gradient(135deg, rgba(54, 97, 226, 0.08) 0%, rgba(91, 128, 240, 0.04) 100%);
+  }
+
+  .dark .gradient-primary-soft {
+    background: linear-gradient(135deg, rgba(54, 97, 226, 0.15) 0%, rgba(91, 128, 240, 0.08) 100%);
+  }
+
+  /* Progress bar di atas halaman (NProgress-style) */
+  .page-progress-bar {
+    @apply fixed top-0 left-0 right-0 h-[2px] z-50;
+    background: linear-gradient(90deg, transparent 0%, #3661E2 50%, #5B80F0 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply bg-border-light rounded-md animate-pulse;
+  }
+
+  .dark .skeleton {
+    @apply bg-border-dark;
+  }
+
+  /* Badge status */
+  .badge-success {
+    @apply bg-success-light text-success-dark text-xs font-medium px-2.5 py-0.5 rounded-full;
+  }
+
+  .badge-warning {
+    @apply bg-warning-light text-warning-dark text-xs font-medium px-2.5 py-0.5 rounded-full;
+  }
+
+  .badge-danger {
+    @apply bg-danger-light text-danger-dark text-xs font-medium px-2.5 py-0.5 rounded-full;
+  }
+
+  .dark .badge-success {
+    @apply bg-success/20 text-success;
+  }
+
+  .dark .badge-warning {
+    @apply bg-warning/20 text-warning;
+  }
+
+  .dark .badge-danger {
+    @apply bg-danger/20 text-danger;
   }
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
+/* ============================================
+   UTILITIES LAYER — Helper classes
+   ============================================ */
+@layer utilities {
+  /* Safe area padding untuk mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-body {
-  margin: 0;
-}
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
+  /* Glassmorphism effect */
+  .glass {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+  .dark .glass {
+    background: rgba(26, 29, 39, 0.75);
+    border: 1px solid rgba(45, 55, 72, 0.3);
+  }
+
+  /* Text gradient */
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #3661E2, #5B80F0);
+  }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Hover card effect */
+  .hover-lift {
+    @apply transition-all duration-250;
+  }
+
+  .hover-lift:hover {
+    @apply -translate-y-0.5 shadow-medium;
+  }
+
+  .dark .hover-lift:hover {
+    @apply shadow-dark-medium;
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+
+/* ============================================
+   LEAFLET MAP OVERRIDES
+   ============================================ */
+.leaflet-container {
+  @apply rounded-xl;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+.leaflet-popup-content-wrapper {
+  @apply rounded-lg shadow-medium !important;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.dark .leaflet-popup-content-wrapper {
+  @apply bg-card-dark text-text-primary-dark !important;
+}
+
+.dark .leaflet-popup-tip {
+  @apply bg-card-dark !important;
 }

@@ -15,6 +15,7 @@ export function useAuth() {
         data: {
           full_name: data.full_name,
           role: 'user',
+          phone: data.phone,
         },
       },
     });

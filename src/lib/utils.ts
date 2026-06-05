@@ -150,3 +150,34 @@ export function getStatusColor(status: string): string {
   };
   return colors[status] || 'bg-gray-100 text-gray-600';
 }
+
+/**
+ * Kompresi gambar sebelum diupload (Optimasi Performa)
+ */
+export async function compressImage(file: File, maxWidthPx: number = 1200): Promise<Blob> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxWidthPx) {
+        height = (height * maxWidthPx) / width;
+        width = maxWidthPx;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => resolve(blob!),
+        'image/webp',
+        0.8, // quality 80%
+      );
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}

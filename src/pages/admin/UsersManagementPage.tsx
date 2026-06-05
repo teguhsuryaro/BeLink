@@ -189,78 +189,137 @@ export default function UsersManagementPage() {
               ))}
             </div>
           ) : filteredUsers.length > 0 ? (
-            <div className="divide-y divide-border-light dark:divide-border-dark overflow-x-auto">
-              <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-gray-50 dark:bg-gray-900/50 text-xs uppercase text-text-muted-light dark:text-text-muted-dark">
-                  <tr>
-                    <th className="px-6 py-4 font-medium">Pengguna</th>
-                    <th className="px-6 py-4 font-medium">Role</th>
-                    <th className="px-6 py-4 font-medium">Status</th>
-                    <th className="px-6 py-4 font-medium">Terdaftar</th>
-                    <th className="px-6 py-4 font-medium text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                  {filteredUsers.map((user) => (
-                    <tr key={user.id} className={cn("transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50", user.is_banned && "opacity-60 bg-danger/5 dark:bg-danger/10")}>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="relative">
-                            <img 
-                              src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name)}&background=random`} 
-                              alt={user.full_name}
-                              className="h-10 w-10 rounded-full object-cover"
-                            />
-                            {/* Online Indicator */}
-                            <div className={cn("absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-gray-900", user.is_online ? "bg-success" : "bg-gray-400")} />
+            <>
+              {/* Mobile View: Cards */}
+              <div className="divide-y divide-border-light dark:divide-border-dark md:hidden">
+                {filteredUsers.map((user) => (
+                  <div key={user.id} className={cn("p-4 space-y-3", user.is_banned && "opacity-60 bg-danger/5 dark:bg-danger/10")}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="relative shrink-0">
+                          <img 
+                            src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name)}&background=random`} 
+                            alt={user.full_name}
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                          <div className={cn("absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-gray-900", user.is_online ? "bg-success" : "bg-gray-400")} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-text-primary-light dark:text-text-primary-dark truncate">
+                            {user.full_name}
                           </div>
-                          <div>
-                            <div className="font-semibold text-text-primary-light dark:text-text-primary-dark">
-                              {user.full_name}
-                            </div>
-                            <div className="text-xs text-text-muted-light dark:text-text-muted-dark">
-                              {user.email}
-                            </div>
+                          <div className="text-xs text-text-muted-light dark:text-text-muted-dark truncate">
+                            {user.email}
                           </div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {getRoleBadge(user.role)}
-                      </td>
-                      <td className="px-6 py-4">
-                        {user.is_banned ? (
-                          <Badge variant="danger" className="gap-1"><Ban className="h-3 w-3"/> Banned</Badge>
-                        ) : (
-                          <Badge variant="success" className="gap-1"><CheckCircle className="h-3 w-3"/> Aktif</Badge>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-text-muted-light dark:text-text-muted-dark">
-                        {formatDate(user.created_at)}
-                      </td>
-                      <td className="px-6 py-4 text-right">
+                      </div>
+                      <div className="shrink-0">
                         {user.role !== 'superadmin' && (
                           <Button
                             variant={user.is_banned ? "success" : "danger"}
                             size="sm"
-                            className="h-8 px-3"
+                            className="h-8 w-8 p-0"
                             onClick={() => {
                               setSelectedUser(user);
                               setIsBanModalOpen(true);
                             }}
                           >
-                            {user.is_banned ? (
-                              <><UserCheck className="h-4 w-4 mr-1 md:mr-2" /> <span className="hidden md:inline">Unban</span></>
-                            ) : (
-                              <><UserX className="h-4 w-4 mr-1 md:mr-2" /> <span className="hidden md:inline">Ban</span></>
-                            )}
+                            {user.is_banned ? <UserCheck className="h-4 w-4" /> : <UserX className="h-4 w-4" />}
                           </Button>
                         )}
-                      </td>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs pt-1">
+                      <div className="flex items-center gap-2">
+                        {getRoleBadge(user.role)}
+                        {user.is_banned ? (
+                          <span className="flex items-center gap-1 font-medium text-danger"><Ban className="h-3 w-3"/> Banned</span>
+                        ) : (
+                          <span className="flex items-center gap-1 font-medium text-success"><CheckCircle className="h-3 w-3"/> Aktif</span>
+                        )}
+                      </div>
+                      <div className="text-text-muted-light dark:text-text-muted-dark">
+                        {formatDate(user.created_at).split(',')[0]}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop View: Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap">
+                  <thead className="bg-gray-50 dark:bg-gray-900/50 text-xs uppercase text-text-muted-light dark:text-text-muted-dark border-b border-border-light dark:border-border-dark">
+                    <tr>
+                      <th className="px-6 py-4 font-medium">Pengguna</th>
+                      <th className="px-6 py-4 font-medium">Role</th>
+                      <th className="px-6 py-4 font-medium">Status</th>
+                      <th className="px-6 py-4 font-medium">Terdaftar</th>
+                      <th className="px-6 py-4 font-medium text-right">Aksi</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                    {filteredUsers.map((user) => (
+                      <tr key={user.id} className={cn("transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50", user.is_banned && "opacity-60 bg-danger/5 dark:bg-danger/10")}>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="relative shrink-0">
+                              <img 
+                                src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name)}&background=random`} 
+                                alt={user.full_name}
+                                className="h-10 w-10 rounded-full object-cover"
+                              />
+                              <div className={cn("absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-gray-900", user.is_online ? "bg-success" : "bg-gray-400")} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-text-primary-light dark:text-text-primary-dark truncate">
+                                {user.full_name}
+                              </div>
+                              <div className="text-xs text-text-muted-light dark:text-text-muted-dark truncate">
+                                {user.email}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {getRoleBadge(user.role)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {user.is_banned ? (
+                            <Badge variant="danger" className="gap-1"><Ban className="h-3 w-3"/> Banned</Badge>
+                          ) : (
+                            <Badge variant="success" className="gap-1"><CheckCircle className="h-3 w-3"/> Aktif</Badge>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-text-muted-light dark:text-text-muted-dark">
+                          {formatDate(user.created_at)}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {user.role !== 'superadmin' && (
+                            <Button
+                              variant={user.is_banned ? "success" : "danger"}
+                              size="sm"
+                              className="h-8 px-3"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setIsBanModalOpen(true);
+                              }}
+                            >
+                              {user.is_banned ? (
+                                <><UserCheck className="h-4 w-4 mr-2" /> <span>Unban</span></>
+                              ) : (
+                                <><UserX className="h-4 w-4 mr-2" /> <span>Ban</span></>
+                              )}
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           ) : (
             <div className="py-12 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">

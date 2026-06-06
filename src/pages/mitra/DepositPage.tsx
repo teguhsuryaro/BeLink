@@ -87,7 +87,7 @@ export default function DepositPage() {
         .from('deposit_transactions')
         .insert({
           mitra_id: profile.id,
-          type: 'topup',
+          type: 'top_up',
           amount: topUpAmount,
           balance_after: newBalance,
           notes: `Top up saldo via QR (Demo)`,

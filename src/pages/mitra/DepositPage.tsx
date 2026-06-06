@@ -87,7 +87,7 @@ export default function DepositPage() {
         .from('deposit_transactions')
         .insert({
           mitra_id: profile.id,
-          type: 'top_up',
+          type: 'topup',
           amount: topUpAmount,
           balance_after: newBalance,
           notes: `Top up saldo via QR (Demo)`,
@@ -102,9 +102,9 @@ export default function DepositPage() {
       setIsTopUpModalOpen(false);
       setTopUpStep('input');
       setTopUpAmount(0);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Top up error:', error);
-      toast.error('Gagal melakukan top up');
+      toast.error(`Gagal melakukan top up: ${error.message || 'Unknown error'}`);
     } finally {
       setIsProcessingTopUp(false);
     }

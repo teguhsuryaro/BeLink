@@ -39,6 +39,11 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     );
   }
 
+  // Superadmin hanya boleh akses admin panel
+  if (profile.role === 'superadmin' && !allowedRoles?.includes('superadmin')) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
   // Cek role jika diperlukan
   if (allowedRoles && !allowedRoles.includes(profile.role)) {
     return <Navigate to="/home" replace />;

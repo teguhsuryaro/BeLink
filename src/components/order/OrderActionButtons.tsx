@@ -96,10 +96,24 @@ export function OrderActionButtons({ order, role, onReview }: OrderActionButtons
           </div>
         );
       case 'otw':
+      case 'arrived':
+      case 'in_progress':
         return (
-          <Button variant="danger" size="sm" className="w-full" onClick={handleCancel}>
-            Batalkan Pesanan
-          </Button>
+          <div className="flex flex-col gap-2 w-full">
+            <Button variant="danger" size="sm" className="w-full" onClick={handleCancel}>
+              Batalkan Pesanan
+            </Button>
+            {/* --- SHORTCUT PROTOTYPE --- */}
+            <Button 
+              variant="success" 
+              size="sm" 
+              className="w-full mt-2" 
+              onClick={() => handleStatusUpdate('completed')}
+              leftIcon={<Check className="h-4 w-4" />}
+            >
+              Selesaikan Orderan (Demo Shortcut)
+            </Button>
+          </div>
         );
       case 'completed':
         return (

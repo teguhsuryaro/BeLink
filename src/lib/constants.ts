@@ -24,8 +24,9 @@ export const LOW_DEPOSIT_THRESHOLD = 12000;
 
 /**
  * Radius pencarian mitra default (dalam km)
+ * (Diperbesar untuk kebutuhan simulasi prototype)
  */
-export const DEFAULT_SEARCH_RADIUS_KM = 15;
+export const DEFAULT_SEARCH_RADIUS_KM = 20;
 
 /**
  * Maksimum ukuran file upload (dalam bytes)

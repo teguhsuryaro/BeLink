@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowUpCircle, ArrowDownCircle, AlertTriangle, Wallet, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store/authStore';
-import { formatIDR, formatDate } from '@/lib/utils';
+import { formatIDR, formatDate, cn } from '@/lib/utils';
 import { LOW_DEPOSIT_THRESHOLD, MIN_DEPOSIT_BALANCE } from '@/lib/constants';
 import type { MitraProfile } from '@/types/user.types';
 
@@ -13,12 +13,13 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { toast } from '@/components/ui/Toast';
 
 interface DepositTransaction {
   id: string;
   mitra_id: string;
   amount: number;
-  type: 'top_up' | 'commission_deduction' | 'withdrawal';
+  type: 'topup' | 'top_up' | 'commission_deduction' | 'withdrawal';
   balance_after: number;
   reference_order_id: string | null;
   notes: string | null;
@@ -28,7 +29,11 @@ interface DepositTransaction {
 export default function DepositPage() {
   const navigate = useNavigate();
   const { profile } = useAuthStore();
+  const queryClient = useQueryClient();
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+  const [topUpStep, setTopUpStep] = useState<'input' | 'qr'>('input');
+  const [topUpAmount, setTopUpAmount] = useState<number>(0);
+  const [isProcessingTopUp, setIsProcessingTopUp] = useState(false);
 
   const { data: mitraProfile, isLoading: isProfileLoading } = useQuery({
     queryKey: ['mitra-profile', profile?.id],
@@ -63,6 +68,47 @@ export default function DepositPage() {
   const currentBalance = mitraProfile?.deposit_balance || 0;
   const isLowBalance = currentBalance < LOW_DEPOSIT_THRESHOLD;
   const isInsufficientBalance = currentBalance < MIN_DEPOSIT_BALANCE;
+
+  const handleConfirmTopUp = async () => {
+    if (!profile || topUpAmount < MIN_DEPOSIT_BALANCE) return;
+
+    setIsProcessingTopUp(true);
+    try {
+      const newBalance = currentBalance + topUpAmount;
+
+      const { error: updateError } = await supabase
+        .from('mitra_profiles')
+        .update({ deposit_balance: newBalance })
+        .eq('id', profile.id);
+
+      if (updateError) throw updateError;
+
+      const { error: txError } = await supabase
+        .from('deposit_transactions')
+        .insert({
+          mitra_id: profile.id,
+          type: 'topup',
+          amount: topUpAmount,
+          balance_after: newBalance,
+          notes: `Top up saldo via QR (Demo)`,
+        });
+
+      if (txError) throw txError;
+
+      queryClient.invalidateQueries({ queryKey: ['mitra-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['deposit-transactions'] });
+
+      toast.success(`Saldo bertambah ${formatIDR(topUpAmount)}`);
+      setIsTopUpModalOpen(false);
+      setTopUpStep('input');
+      setTopUpAmount(0);
+    } catch (error) {
+      console.error('Top up error:', error);
+      toast.error('Gagal melakukan top up');
+    } finally {
+      setIsProcessingTopUp(false);
+    }
+  };
 
   return (
     <PageTransition className="min-h-screen bg-surface-light px-4 py-8 dark:bg-surface-dark pb-24 md:pb-8">
@@ -112,7 +158,7 @@ export default function DepositPage() {
               <Button 
                 variant="secondary" 
                 size="lg" 
-                className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-shadow bg-white text-primary hover:bg-gray-50"
+                className="w-full sm:w-auto shadow-lg hover:shadow-xl transition-shadow bg-white text-primary hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 dark:border-gray-700"
                 onClick={() => setIsTopUpModalOpen(true)}
               >
                 Top Up Saldo
@@ -143,7 +189,7 @@ export default function DepositPage() {
             ) : transactions && transactions.length > 0 ? (
               <div className="divide-y divide-border-light dark:divide-border-dark">
                 {transactions.map((tx) => {
-                  const isPositive = tx.type === 'top_up';
+                  const isPositive = tx.type === 'topup' || tx.type === 'top_up';
                   
                   return (
                     <div key={tx.id} className="flex items-center gap-4 p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -198,53 +244,112 @@ export default function DepositPage() {
       {/* Top Up Modal */}
       <Modal
         open={isTopUpModalOpen}
-        onOpenChange={setIsTopUpModalOpen}
-        title="Instruksi Top Up Saldo"
+        onOpenChange={(open) => {
+          setIsTopUpModalOpen(open);
+          if (!open) {
+            setTopUpStep('input');
+            setTopUpAmount(0);
+          }
+        }}
+        title="Top Up Saldo"
       >
-        <div className="space-y-6">
-          <div className="rounded-xl bg-primary/10 p-4 text-center">
-            <h4 className="font-bold text-primary mb-2">Transfer Manual ke Admin BeLink</h4>
-            <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
-              Saat ini sistem Top Up dilakukan secara manual. Silakan transfer sejumlah saldo yang ingin Anda isi ke rekening di bawah ini:
-            </p>
+        {topUpStep === 'input' && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h4 className="font-bold text-text-primary-light dark:text-text-primary-dark mb-2">
+                Masukkan Nominal Top Up
+              </h4>
+              <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
+                Minimum top up: {formatIDR(MIN_DEPOSIT_BALANCE)}
+              </p>
+            </div>
+
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-text-muted-light dark:text-text-muted-dark">Rp</span>
+              <input
+                type="number"
+                min={MIN_DEPOSIT_BALANCE}
+                value={topUpAmount || ''}
+                onChange={(e) => setTopUpAmount(Number(e.target.value))}
+                placeholder="10000"
+                className="w-full rounded-xl border border-border-light bg-card-light py-4 pl-12 pr-4 text-2xl font-bold text-center focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-border-dark dark:bg-card-dark dark:text-white"
+              />
+            </div>
+
+            {/* Quick Amount Buttons */}
+            <div className="grid grid-cols-3 gap-2">
+              {[10000, 25000, 50000, 100000, 200000, 500000].map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  onClick={() => setTopUpAmount(amount)}
+                  className={cn(
+                    "rounded-lg border py-2 text-sm font-medium transition-colors",
+                    topUpAmount === amount
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border-light hover:border-primary/50 dark:border-border-dark"
+                  )}
+                >
+                  {formatIDR(amount)}
+                </button>
+              ))}
+            </div>
+
+            <Button
+              size="lg"
+              className="w-full"
+              disabled={topUpAmount < MIN_DEPOSIT_BALANCE}
+              onClick={() => setTopUpStep('qr')}
+            >
+              Lanjut
+            </Button>
           </div>
-          
-          <div className="space-y-4">
-            <Card className="p-4 border border-border-light dark:border-border-dark bg-gray-50 dark:bg-gray-800">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-text-muted-light dark:text-text-muted-dark">Bank BCA</span>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia.svg/2560px-Bank_Central_Asia.svg.png" alt="BCA" className="h-4 object-contain" />
+        )}
+
+        {topUpStep === 'qr' && (
+          <div className="space-y-6 text-center">
+            <div>
+              <h4 className="font-bold text-text-primary-light dark:text-text-primary-dark mb-1">
+                Scan QR untuk Pembayaran
+              </h4>
+              <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
+                Nominal: <span className="font-bold text-primary">{formatIDR(topUpAmount)}</span>
+              </p>
+            </div>
+
+            {/* QR Code Gimmick */}
+            <div className="mx-auto w-48 h-48 bg-white rounded-xl p-4 shadow-inner border flex items-center justify-center">
+              <div className="w-full h-full border-4 border-dashed border-gray-300 rounded-lg flex items-center justify-center relative">
+                <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-1 p-2">
+                  {Array.from({ length: 16 }).map((_, i) => (
+                    <div key={i} className={`bg-gray-800 rounded-sm ${Math.random() > 0.5 ? 'opacity-100' : 'opacity-20'}`} />
+                  ))}
+                </div>
+                <div className="bg-white p-2 z-10 rounded shadow">
+                  <Wallet className="h-6 w-6 text-primary" />
+                </div>
               </div>
-              <div className="font-bold text-xl tracking-wider text-text-primary-light dark:text-text-primary-dark">
-                123 456 7890
-              </div>
-              <div className="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">
-                a.n. PT BeLink Digital Nusantara
-              </div>
-            </Card>
-            
-            <div className="space-y-3">
-              <h5 className="font-bold text-text-primary-light dark:text-text-primary-dark text-sm">Langkah selanjutnya:</h5>
-              <ol className="list-decimal list-inside space-y-2 text-sm text-text-muted-light dark:text-text-muted-dark">
-                <li>Lakukan transfer sesuai nominal yang diinginkan.</li>
-                <li>Simpan bukti transfer (struk/screenshot).</li>
-                <li>Kirim bukti transfer ke WhatsApp Admin BeLink.</li>
-                <li>Admin akan memverifikasi dan menambahkan saldo ke akun Anda dalam waktu maks. 15 menit.</li>
-              </ol>
+            </div>
+
+            <p className="text-xs text-text-muted-light dark:text-text-muted-dark">
+              (Demo mode — pembayaran disimulasikan)
+            </p>
+
+            <div className="flex gap-3">
+              <Button variant="outline" className="w-1/3" onClick={() => setTopUpStep('input')}>
+                Kembali
+              </Button>
+              <Button
+                className="w-2/3"
+                size="lg"
+                isLoading={isProcessingTopUp}
+                onClick={handleConfirmTopUp}
+              >
+                Konfirmasi Pembayaran
+              </Button>
             </div>
           </div>
-
-          <Button 
-            className="w-full" 
-            size="lg"
-            onClick={() => {
-              window.open('https://wa.me/6281234567890?text=Halo%20Admin%20BeLink,%20saya%20ingin%20konfirmasi%20top%20up%20deposit', '_blank');
-              setIsTopUpModalOpen(false);
-            }}
-          >
-            Konfirmasi via WhatsApp
-          </Button>
-        </div>
+        )}
       </Modal>
     </PageTransition>
   );

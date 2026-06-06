@@ -71,50 +71,58 @@ export default function LandingPage() {
 
           <StaggerContainer className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <StaggerItem>
-              <Card hover className="h-full">
-                <CardHeader>
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <MapPin className="h-6 w-6" />
-                  </div>
-                  <CardTitle>Akurat & Cepat</CardTitle>
-                  <CardDescription>Deteksi lokasi GPS untuk menemukan mekanik terdekat secara instan.</CardDescription>
-                </CardHeader>
+              <Card hover className="h-full flex flex-col p-6">
+                <div className="mb-4 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <MapPin className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark mb-2">
+                  Akurat & Cepat
+                </h3>
+                <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
+                  Deteksi lokasi GPS untuk menemukan mekanik terdekat secara instan.
+                </p>
               </Card>
             </StaggerItem>
 
             <StaggerItem>
-              <Card hover className="h-full">
-                <CardHeader>
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Zap className="h-6 w-6" />
-                  </div>
-                  <CardTitle>Respons Tanggap</CardTitle>
-                  <CardDescription>Layanan darurat siaga membantu masalah kendaraan Anda dengan cepat.</CardDescription>
-                </CardHeader>
+              <Card hover className="h-full flex flex-col p-6">
+                <div className="mb-4 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Zap className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark mb-2">
+                  Respons Tanggap
+                </h3>
+                <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
+                  Layanan darurat siaga membantu masalah kendaraan Anda dengan cepat.
+                </p>
               </Card>
             </StaggerItem>
 
             <StaggerItem>
-              <Card hover className="h-full">
-                <CardHeader>
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Banknote className="h-6 w-6" />
-                  </div>
-                  <CardTitle>Harga Transparan</CardTitle>
-                  <CardDescription>Sistem negosiasi harga di awal mencegah biaya tersembunyi.</CardDescription>
-                </CardHeader>
+              <Card hover className="h-full flex flex-col p-6">
+                <div className="mb-4 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Banknote className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark mb-2">
+                  Harga Transparan
+                </h3>
+                <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
+                  Sistem negosiasi harga di awal mencegah biaya tersembunyi.
+                </p>
               </Card>
             </StaggerItem>
 
             <StaggerItem>
-              <Card hover className="h-full">
-                <CardHeader>
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <MessageSquare className="h-6 w-6" />
-                  </div>
-                  <CardTitle>Live Chat</CardTitle>
-                  <CardDescription>Komunikasi langsung dengan mekanik sebelum mereka berangkat.</CardDescription>
-                </CardHeader>
+              <Card hover className="h-full flex flex-col p-6">
+                <div className="mb-4 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <MessageSquare className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark mb-2">
+                  Live Chat
+                </h3>
+                <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
+                  Komunikasi langsung dengan mekanik sebelum mereka berangkat.
+                </p>
               </Card>
             </StaggerItem>
           </StaggerContainer>

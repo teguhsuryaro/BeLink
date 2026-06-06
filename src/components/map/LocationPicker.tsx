@@ -66,7 +66,7 @@ export function LocationPicker({ value, onChange, height = '250px', error }: Loc
       </Button>
 
       {/* Peta */}
-      <div className={cn('overflow-hidden rounded-xl border', error ? 'border-danger' : 'border-border-light dark:border-border-dark')}>
+      <div className={cn('overflow-hidden rounded-xl border touch-none', error ? 'border-danger' : 'border-border-light dark:border-border-dark')}>
         <MapContainer
           center={center}
           zoom={15}

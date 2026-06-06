@@ -77,7 +77,7 @@ export default function HomePage() {
   };
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-6 pb-24 md:pb-8 px-4 py-8">
       {/* Header Section */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>

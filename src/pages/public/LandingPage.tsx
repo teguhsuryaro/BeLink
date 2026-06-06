@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Zap, MapPin, Banknote, MessageSquare, Wrench } from 'lucide-react';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/layout/PageTransition';
 import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 
 export default function LandingPage() {
   const navigate = useNavigate();
